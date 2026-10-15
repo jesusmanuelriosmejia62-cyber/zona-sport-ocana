@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { PRODUCTS, catLabel, coverOf, galleryFor, relatedFor } from './data'
+import { CATS, PRODUCTS, catLabel, coverOf, galleryFor, relatedFor } from './data'
 import { Shot } from './Art'
 
 const LOGO = import.meta.env.BASE_URL + 'logo.webp'
@@ -12,7 +12,14 @@ const MAP_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURICom
 
 const wa = (msg) => `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`
 
-const TICKER = ['Envíos a todo el país', 'Pedidos por WhatsApp', 'Estilo urbano', 'Apoyamos el deporte ocañero', 'Tienda física en Ocaña']
+const HERO_IMG = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1800&auto=format&fit=crop'
+
+const PERKS = [
+  ['Envíos a todo el país', 'Pide desde cualquier ciudad'],
+  ['Pedidos por WhatsApp', 'Fotos y videos reales'],
+  ['Tienda física en Ocaña', 'Cra. 11 #11-17'],
+  ['Estilo urbano', 'Apoyamos el deporte ocañero'],
+]
 
 const STEPS = [
   ['Escríbenos', 'Mándanos un mensaje por WhatsApp con lo que buscas.'],
@@ -54,53 +61,49 @@ function useRoute() {
 
 function Header({ go }) {
   return (
-    <header className="top">
-      <button className="brand" onClick={() => go()} aria-label="Zona Sport Ocaña, inicio">
-        <img src={LOGO} alt="Zona Sport Ocaña" />
-      </button>
-      <nav aria-label="Secciones">
-        <button onClick={() => go('catalogo')}>Catálogo</button>
-        <button onClick={() => go('como-comprar')}>Cómo comprar</button>
-        <button onClick={() => go('visitanos')}>Visítanos</button>
-      </nav>
-      <a className="btn btn-wa" href={wa('Hola Zona Sport, quiero hacer un pedido.')} target="_blank" rel="noreferrer">
-        <WaIcon /> <span>Pedir por WhatsApp</span>
-      </a>
+    <header>
+      <div className="util">
+        <span>Envíos a todo el país · Pedidos por WhatsApp</span>
+        <span>{PHONE_LABEL}</span>
+      </div>
+      <div className="top">
+        <button className="brand" onClick={() => go()} aria-label="Zona Sport Ocaña, inicio">
+          <img src={LOGO} alt="Zona Sport Ocaña" />
+        </button>
+        <nav aria-label="Secciones">
+          <button onClick={() => go('catalogo')}>Catálogo</button>
+          <button onClick={() => go('novedades')}>Novedades</button>
+          <button onClick={() => go('como-comprar')}>Cómo comprar</button>
+          <button onClick={() => go('visitanos')}>Visítanos</button>
+        </nav>
+        <a className="btn btn-wa" href={wa('Hola Zona Sport, quiero hacer un pedido.')} target="_blank" rel="noreferrer">
+          <WaIcon /> <span>Pedir por WhatsApp</span>
+        </a>
+      </div>
     </header>
   )
 }
 
 function Hero({ go }) {
   return (
-    <section className="hero" id="inicio">
-      <div className="hero-bg" aria-hidden="true">
-        <img className="logo-a" src={LOGO} alt="" />
-        <img className="logo-b" src={LOGO} alt="" />
-      </div>
+    <section className="hero dark" id="inicio">
+      <img className="hero-img" src={HERO_IMG} alt="" />
       <div className="hero-copy">
-        <span className="kicker"><i /> Tienda deportiva · Ocaña, Norte de Santander</span>
-        <h1>Donde se vive el deporte <em>con flow.</em></h1>
+        <p className="caption">Tienda deportiva · Ocaña, Norte de Santander</p>
+        <h1>Donde se vive el deporte con flow</h1>
         <p>Camisetas, ropa y artículos deportivos con estilo urbano. Apoyamos el deporte ocañero y enviamos a todo el país.</p>
         <div className="hero-cta">
           <button className="btn btn-white" onClick={() => go('catalogo')}>Ver catálogo</button>
-          <a className="btn btn-ghost" href={wa('Hola Zona Sport, quiero ver lo que tienen disponible.')} target="_blank" rel="noreferrer">Escríbenos por WhatsApp</a>
         </div>
       </div>
-      <aside className="hero-card">
-        <span className="eyebrow">Tienda física</span>
-        <b>Ocaña, Norte de Santander</b>
-        <p>{ADDRESS}</p>
-        <p className="hours">Lunes a sábado · desde las 8:00 a. m.<br />Domingo cerrado</p>
-        <a className="link" href={MAP_LINK} target="_blank" rel="noreferrer">Cómo llegar →</a>
-      </aside>
     </section>
   )
 }
 
-function Marquee() {
+function Perks() {
   return (
-    <div className="marquee" aria-hidden="true">
-      <div>{Array(4).fill(TICKER).flat().map((t, i) => <span key={i}>★ {t}</span>)}</div>
+    <div className="perks">
+      {PERKS.map(([t, d]) => <div key={t}>{t}<span>{d}</span></div>)}
     </div>
   )
 }
@@ -113,8 +116,8 @@ function ProductCard({ p }) {
         {p.tag && <span className="ptag">{p.tag}</span>}
       </div>
       <div className="pbody">
-        <small>{catLabel(p.cat)}</small>
         <h3>{p.name}</h3>
+        <small>{catLabel(p.cat)}</small>
         <span>Consultar precio</span>
       </div>
     </a>
@@ -125,19 +128,36 @@ function Categories() {
   return (
     <section className="section" id="catalogo">
       <span className="eyebrow">Catálogo</span>
-      <h2>Lo que llega, se mueve.</h2>
+      <h2>Lo que llega, se mueve</h2>
       <p className="lead">Nuestro inventario cambia cada semana. Elige una categoría o mira las llegadas en TikTok.</p>
       <div className="offer">
         {TILES.map((t) => (
           <a key={t.cat} className="tile" href={'#/categoria/' + t.cat}>
             <img src={`https://images.unsplash.com/${t.img}?q=80&w=900&auto=format&fit=crop`} alt="" loading="lazy" />
             <div>
-              <h3>{catLabel(t.cat)}</h3>
               <p>{t.d}</p>
-              <span>Ver {catLabel(t.cat).toLowerCase()} →</span>
+              <h3>{catLabel(t.cat)}</h3>
+              <span>Ver {catLabel(t.cat).toLowerCase()}</span>
             </div>
           </a>
         ))}
+      </div>
+    </section>
+  )
+}
+
+function Featured() {
+  return (
+    <section className="section" id="novedades">
+      <div className="head-row">
+        <div>
+          <span className="eyebrow">Novedades</span>
+          <h2>Lo más pedido</h2>
+        </div>
+        <a className="link" href="#/categoria/camisetas">Ver camisetas</a>
+      </div>
+      <div className="pgrid">
+        {PRODUCTS.slice(0, 6).map((p) => <ProductCard key={p.id} p={p} />)}
       </div>
     </section>
   )
@@ -152,7 +172,7 @@ function CategoryPage({ cat, go }) {
     <div className="pdp">
       <button className="back" onClick={() => go('catalogo')}>← Volver al catálogo</button>
       <span className="eyebrow">Catálogo</span>
-      <h2 className="cat-title">{label} <small>{list.length} productos</small></h2>
+      <h1 className="cat-title">{label} <small>{list.length} productos</small></h1>
       <p className="lead">Pídenos fotos reales, precio y tallas disponibles por WhatsApp.</p>
       {list.length === 0 && <p className="lead">Pronto tendremos productos en esta categoría.</p>}
       <div className="pgrid">
@@ -164,10 +184,10 @@ function CategoryPage({ cat, go }) {
 
 function Tiktok() {
   return (
-    <section className="tiktok">
+    <section className="tiktok dark">
       <div>
-        <span className="eyebrow">Llegadas nuevas</span>
-        <h2>Mira lo nuevo en TikTok.</h2>
+        <p className="caption">Llegadas nuevas</p>
+        <h2>Mira lo nuevo en TikTok</h2>
         <p>Cada vez que llega mercancía, la mostramos en video. Síguenos en <b>@zona_sportocana</b>.</p>
       </div>
       <a className="btn btn-white" href={TIKTOK} target="_blank" rel="noreferrer">Ver en TikTok</a>
@@ -179,7 +199,7 @@ function Steps() {
   return (
     <section className="section" id="como-comprar">
       <span className="eyebrow">Cómo comprar</span>
-      <h2>Pide desde donde estés.</h2>
+      <h2>Pide desde donde estés</h2>
       <p className="lead">Compra desde Cúcuta, Bucaramanga o cualquier ciudad del país, con una tienda real detrás.</p>
       <ol className="steps">
         {STEPS.map(([t, d], i) => (
@@ -199,7 +219,7 @@ function Visit() {
     <section className="section visit" id="visitanos">
       <div className="visit-info">
         <span className="eyebrow">Visítanos</span>
-        <h2>Una tienda real, en Ocaña.</h2>
+        <h2>Una tienda real, en Ocaña</h2>
         <dl>
           <dt>Dirección</dt><dd>{ADDRESS}</dd>
           <dt>Horario</dt><dd>Lunes a sábado · desde las 8:00 a. m.<br />Domingo cerrado</dd>
@@ -207,8 +227,8 @@ function Visit() {
           <dt>TikTok</dt><dd>@zona_sportocana</dd>
         </dl>
         <div className="hero-cta">
-          <a className="btn btn-white" href={MAP_LINK} target="_blank" rel="noreferrer">Cómo llegar</a>
-          <a className="btn btn-ghost" href={wa('Hola Zona Sport, tengo una pregunta.')} target="_blank" rel="noreferrer">Escribir</a>
+          <a className="btn btn-dark" href={MAP_LINK} target="_blank" rel="noreferrer">Cómo llegar</a>
+          <a className="btn btn-line" href={wa('Hola Zona Sport, tengo una pregunta.')} target="_blank" rel="noreferrer">Escribir</a>
         </div>
       </div>
       <div className="map-wrap">
@@ -225,9 +245,32 @@ function Visit() {
 function Footer() {
   return (
     <footer className="site-footer">
-      <div className="foot-top">
-        <img src={LOGO} alt="Zona Sport Ocaña" />
-        <p>Tienda deportiva en Ocaña, Norte de Santander. Donde se vive el deporte con flow.</p>
+      <div className="foot-grid">
+        <div className="foot-brand">
+          <img src={LOGO} alt="Zona Sport Ocaña" />
+          <p>Tienda deportiva en Ocaña, Norte de Santander. Donde se vive el deporte con flow.</p>
+        </div>
+        <div className="foot-col">
+          <h4>Tienda</h4>
+          <ul>
+            {CATS.map(([k, label]) => <li key={k}><a href={'#/categoria/' + k}>{label}</a></li>)}
+          </ul>
+        </div>
+        <div className="foot-col">
+          <h4>Contacto</h4>
+          <ul>
+            <li><a href={wa('Hola Zona Sport, tengo una pregunta.')} target="_blank" rel="noreferrer">WhatsApp {PHONE_LABEL}</a></li>
+            <li><a href={TIKTOK} target="_blank" rel="noreferrer">TikTok @zona_sportocana</a></li>
+          </ul>
+        </div>
+        <div className="foot-col">
+          <h4>Visítanos</h4>
+          <ul>
+            <li>{ADDRESS}</li>
+            <li>Lunes a sábado · desde las 8:00 a. m.</li>
+            <li><a href={MAP_LINK} target="_blank" rel="noreferrer">Cómo llegar</a></li>
+          </ul>
+        </div>
       </div>
       <div className="foot-bottom">
         <span>© 2026 Zona Sport Ocaña</span>
@@ -339,8 +382,9 @@ export default function App() {
         {route.name === 'home' && (
           <>
             <Hero go={go} />
-            <Marquee />
+            <Perks />
             <Categories />
+            <Featured />
             <Tiktok />
             <Steps />
             <Visit />

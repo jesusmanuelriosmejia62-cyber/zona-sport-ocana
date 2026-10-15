@@ -29,11 +29,11 @@ function Jersey({ body, trim, ink, pattern, view, num, name }) {
       <line x1="352" y1="102" x2="312" y2="152" stroke={trim} strokeWidth="12" strokeLinecap="round" />
       <path d={`M158 32 Q200 ${neck} 242 32`} stroke={trim} strokeWidth="10" fill="none" strokeLinecap="round" />
       {front ? (<>
-        <text x="200" y="150" textAnchor="middle" fontFamily="Chakra Petch, sans-serif" fontStyle="italic" fontWeight="700" fontSize="34" letterSpacing="2" fill={ink}>ZONA</text>
-        <text x="200" y="168" textAnchor="middle" fontFamily="Chakra Petch, sans-serif" fontStyle="italic" fontWeight="500" fontSize="11" letterSpacing="3" fill={ink}>SPORT OCAÑA</text>
+        <text x="200" y="150" textAnchor="middle" fontFamily="Jost, sans-serif" fontWeight="700" fontSize="34" letterSpacing="2" fill={ink}>ZONA</text>
+        <text x="200" y="168" textAnchor="middle" fontFamily="Jost, sans-serif" fontWeight="500" fontSize="11" letterSpacing="3" fill={ink}>SPORT OCAÑA</text>
       </>) : (<>
-        <text x="200" y="118" textAnchor="middle" fontFamily="Chakra Petch, sans-serif" fontWeight="700" fontSize="22" letterSpacing="4" fill={ink}>{name}</text>
-        <text x="200" y="270" textAnchor="middle" fontFamily="Chakra Petch, sans-serif" fontStyle="italic" fontWeight="700" fontSize="130" fill={ink}>{num}</text>
+        <text x="200" y="118" textAnchor="middle" fontFamily="Jost, sans-serif" fontWeight="700" fontSize="22" letterSpacing="4" fill={ink}>{name}</text>
+        <text x="200" y="270" textAnchor="middle" fontFamily="Jost, sans-serif" fontWeight="700" fontSize="130" fill={ink}>{num}</text>
       </>)}
     </svg>
   )
