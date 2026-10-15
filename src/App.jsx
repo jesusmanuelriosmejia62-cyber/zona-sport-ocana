@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CATS, PRODUCTS, catLabel, coverOf, galleryFor, relatedFor } from './data'
 import { Shot } from './Art'
 
@@ -12,14 +12,7 @@ const MAP_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURICom
 
 const wa = (msg) => `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`
 
-const HERO_IMG = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1800&auto=format&fit=crop'
-
-const PERKS = [
-  ['Envíos a todo el país', 'Pide desde cualquier ciudad'],
-  ['Pedidos por WhatsApp', 'Fotos y videos reales'],
-  ['Tienda física en Ocaña', 'Cra. 11 #11-17'],
-  ['Estilo urbano', 'Apoyamos el deporte ocañero'],
-]
+const TICKER = ['Envíos a todo el país', 'Pedidos por WhatsApp', 'Estilo urbano', 'Apoyamos el deporte ocañero', 'Tienda física en Ocaña']
 
 const STEPS = [
   ['Escríbenos', 'Mándanos un mensaje por WhatsApp con lo que buscas.'],
@@ -59,51 +52,95 @@ function useRoute() {
   return route
 }
 
+// En pantallas con ratón el menú abre al pasar; en táctiles abre al tocar.
+const canHover = () => window.matchMedia('(hover: hover)').matches
+
 function Header({ go }) {
+  const [menu, setMenu] = useState(false)
+  const [dd, setDd] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const onDown = (e) => { if (ref.current && !ref.current.contains(e.target)) { setDd(false); setMenu(false) } }
+    const onKey = (e) => { if (e.key === 'Escape') { setDd(false); setMenu(false) } }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
+  }, [])
+
+  const close = () => { setDd(false); setMenu(false) }
+  const goTo = (section) => { close(); go(section) }
+
   return (
-    <header>
+    <>
       <div className="util">
         <span>Envíos a todo el país · Pedidos por WhatsApp</span>
         <span>{PHONE_LABEL}</span>
       </div>
-      <div className="top">
-        <button className="brand" onClick={() => go()} aria-label="Zona Sport Ocaña, inicio">
+      <header className="top" ref={ref}>
+        <button className="brand" onClick={() => goTo()} aria-label="Zona Sport Ocaña, inicio">
           <img src={LOGO} alt="Zona Sport Ocaña" />
         </button>
-        <nav aria-label="Secciones">
-          <button onClick={() => go('catalogo')}>Catálogo</button>
-          <button onClick={() => go('novedades')}>Novedades</button>
-          <button onClick={() => go('como-comprar')}>Cómo comprar</button>
-          <button onClick={() => go('visitanos')}>Visítanos</button>
+        <nav aria-label="Secciones" className={menu ? 'open' : ''}>
+          <div className={'dd' + (dd ? ' open' : '')} onMouseEnter={() => canHover() && setDd(true)} onMouseLeave={() => canHover() && setDd(false)}>
+            <button className="dd-btn" aria-haspopup="true" aria-expanded={dd} onClick={() => (canHover() ? setDd(true) : setDd((v) => !v))}>
+              Catálogo <span className="caret" aria-hidden="true">▾</span>
+            </button>
+            <div className="dd-menu">
+              {CATS.map(([k, label]) => (
+                <a key={k} href={'#/categoria/' + k} onClick={close}>
+                  {label} <small>{PRODUCTS.filter((p) => p.cat === k).length}</small>
+                </a>
+              ))}
+              <button onClick={() => goTo('catalogo')}>Ver todo el catálogo →</button>
+            </div>
+          </div>
+          <button onClick={() => goTo('novedades')}>Novedades</button>
+          <button onClick={() => goTo('como-comprar')}>Cómo comprar</button>
+          <button onClick={() => goTo('visitanos')}>Visítanos</button>
         </nav>
         <a className="btn btn-wa" href={wa('Hola Zona Sport, quiero hacer un pedido.')} target="_blank" rel="noreferrer">
           <WaIcon /> <span>Pedir por WhatsApp</span>
         </a>
-      </div>
-    </header>
+        <button className="burger" aria-label="Abrir menú" aria-expanded={menu} onClick={() => setMenu((v) => !v)}>
+          <i /><i /><i />
+        </button>
+      </header>
+    </>
   )
 }
 
 function Hero({ go }) {
   return (
-    <section className="hero dark" id="inicio">
-      <img className="hero-img" src={HERO_IMG} alt="" />
+    <section className="hero" id="inicio">
+      <div className="hero-bg" aria-hidden="true">
+        <img className="logo-a" src={LOGO} alt="" />
+        <img className="logo-b" src={LOGO} alt="" />
+      </div>
       <div className="hero-copy">
-        <p className="caption">Tienda deportiva · Ocaña, Norte de Santander</p>
-        <h1>Donde se vive el deporte con flow</h1>
+        <span className="kicker"><i /> Tienda deportiva · Ocaña, Norte de Santander</span>
+        <h1>Donde se vive el deporte <em>con flow.</em></h1>
         <p>Camisetas, ropa y artículos deportivos con estilo urbano. Apoyamos el deporte ocañero y enviamos a todo el país.</p>
         <div className="hero-cta">
           <button className="btn btn-white" onClick={() => go('catalogo')}>Ver catálogo</button>
+          <a className="btn btn-ghost" href={wa('Hola Zona Sport, quiero ver lo que tienen disponible.')} target="_blank" rel="noreferrer">Escríbenos por WhatsApp</a>
         </div>
       </div>
+      <aside className="hero-card">
+        <span className="eyebrow">Tienda física</span>
+        <b>Ocaña, Norte de Santander</b>
+        <p>{ADDRESS}</p>
+        <p className="hours">Lunes a sábado · desde las 8:00 a. m.<br />Domingo cerrado</p>
+        <a className="link" href={MAP_LINK} target="_blank" rel="noreferrer">Cómo llegar →</a>
+      </aside>
     </section>
   )
 }
 
-function Perks() {
+function Marquee() {
   return (
-    <div className="perks">
-      {PERKS.map(([t, d]) => <div key={t}>{t}<span>{d}</span></div>)}
+    <div className="marquee" aria-hidden="true">
+      <div>{Array(4).fill(TICKER).flat().map((t, i) => <span key={i}>★ {t}</span>)}</div>
     </div>
   )
 }
@@ -128,7 +165,7 @@ function Categories() {
   return (
     <section className="section" id="catalogo">
       <span className="eyebrow">Catálogo</span>
-      <h2>Lo que llega, se mueve</h2>
+      <h2>Lo que llega, se mueve.</h2>
       <p className="lead">Nuestro inventario cambia cada semana. Elige una categoría o mira las llegadas en TikTok.</p>
       <div className="offer">
         {TILES.map((t) => (
@@ -152,7 +189,7 @@ function Featured() {
       <div className="head-row">
         <div>
           <span className="eyebrow">Novedades</span>
-          <h2>Lo más pedido</h2>
+          <h2>Lo más pedido.</h2>
         </div>
         <a className="link" href="#/categoria/camisetas">Ver camisetas</a>
       </div>
@@ -172,7 +209,7 @@ function CategoryPage({ cat, go }) {
     <div className="pdp">
       <button className="back" onClick={() => go('catalogo')}>← Volver al catálogo</button>
       <span className="eyebrow">Catálogo</span>
-      <h1 className="cat-title">{label} <small>{list.length} productos</small></h1>
+      <h2 className="cat-title">{label} <small>{list.length} productos</small></h2>
       <p className="lead">Pídenos fotos reales, precio y tallas disponibles por WhatsApp.</p>
       {list.length === 0 && <p className="lead">Pronto tendremos productos en esta categoría.</p>}
       <div className="pgrid">
@@ -184,10 +221,10 @@ function CategoryPage({ cat, go }) {
 
 function Tiktok() {
   return (
-    <section className="tiktok dark">
+    <section className="tiktok">
       <div>
-        <p className="caption">Llegadas nuevas</p>
-        <h2>Mira lo nuevo en TikTok</h2>
+        <span className="eyebrow">Llegadas nuevas</span>
+        <h2>Mira lo nuevo en TikTok.</h2>
         <p>Cada vez que llega mercancía, la mostramos en video. Síguenos en <b>@zona_sportocana</b>.</p>
       </div>
       <a className="btn btn-white" href={TIKTOK} target="_blank" rel="noreferrer">Ver en TikTok</a>
@@ -199,7 +236,7 @@ function Steps() {
   return (
     <section className="section" id="como-comprar">
       <span className="eyebrow">Cómo comprar</span>
-      <h2>Pide desde donde estés</h2>
+      <h2>Pide desde donde estés.</h2>
       <p className="lead">Compra desde Cúcuta, Bucaramanga o cualquier ciudad del país, con una tienda real detrás.</p>
       <ol className="steps">
         {STEPS.map(([t, d], i) => (
@@ -219,7 +256,7 @@ function Visit() {
     <section className="section visit" id="visitanos">
       <div className="visit-info">
         <span className="eyebrow">Visítanos</span>
-        <h2>Una tienda real, en Ocaña</h2>
+        <h2>Una tienda real, en Ocaña.</h2>
         <dl>
           <dt>Dirección</dt><dd>{ADDRESS}</dd>
           <dt>Horario</dt><dd>Lunes a sábado · desde las 8:00 a. m.<br />Domingo cerrado</dd>
@@ -227,8 +264,8 @@ function Visit() {
           <dt>TikTok</dt><dd>@zona_sportocana</dd>
         </dl>
         <div className="hero-cta">
-          <a className="btn btn-dark" href={MAP_LINK} target="_blank" rel="noreferrer">Cómo llegar</a>
-          <a className="btn btn-line" href={wa('Hola Zona Sport, tengo una pregunta.')} target="_blank" rel="noreferrer">Escribir</a>
+          <a className="btn btn-white" href={MAP_LINK} target="_blank" rel="noreferrer">Cómo llegar</a>
+          <a className="btn btn-ghost" href={wa('Hola Zona Sport, tengo una pregunta.')} target="_blank" rel="noreferrer">Escribir</a>
         </div>
       </div>
       <div className="map-wrap">
@@ -382,7 +419,7 @@ export default function App() {
         {route.name === 'home' && (
           <>
             <Hero go={go} />
-            <Perks />
+            <Marquee />
             <Categories />
             <Featured />
             <Tiktok />
